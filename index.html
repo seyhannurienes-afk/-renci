@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gelişmiş Akademik Simülasyon ve Sistem Dinamiği">
+    <title>Sistem Dinamiği: Akademik Simülasyon</title>
+    <!-- Plotly.js for Charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        :root {
+            --primary: #8b5cf6; /* Neon Purple */
+            --primary-hover: #7c3aed;
+            --accent: #06b6d4; /* Neon Cyan */
+            --bg-color: #0f172a;
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            /* Animated Gradient Background */
+            background: linear-gradient(45deg, #020617, #1e1b4b, #0f172a, #312e81);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 380px 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* Premium Glassmorphism Panels */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            background: -webkit-linear-gradient(45deg, #22d3ee, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(192, 132, 252, 0.3);
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Sliders / Controls */
+        .control-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        .val-display {
+            color: var(--accent);
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 15px var(--accent);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+        
+        input[type=range]:hover::-webkit-slider-runnable-track {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Glowing Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 14px;
+            background: var(--primary);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            margin-top: 1rem;
+            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::after {
+            left: 150%;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px -5px rgba(139, 92, 246, 0.7);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.8rem 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--accent); opacity: 0; transition: opacity 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        
+        .metric-card:hover::before { opacity: 1; }
+
+        .metric-title {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.5s;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+            height: auto;
+            margin-top: 2rem;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Timeline CSS (Gerçekçi Saat Dilimleri) */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+            margin-top: 1.5rem;
+            list-style: none;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(255,255,255,0.1);
+        }
+        .timeline-item {
+            --timeline-color: var(--primary);
+            position: relative;
+            margin-bottom: 1.8rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--timeline-color);
+            box-shadow: 0 0 15px var(--timeline-color);
+            border: 2px solid var(--bg-color);
+            z-index: 1;
+        }
+        .timeline-time {
+            font-size: 0.9rem;
+            color: var(--timeline-color);
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.5px;
+        }
+        .timeline-content {
+            font-size: 1rem;
+            color: var(--text-main);
+            background: rgba(255,255,255,0.03);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            body { grid-template-columns: 1fr 1fr; }
+            #table-panel { grid-column: 1 / -1; }
+        }
+        @media (max-width: 800px) {
+            body { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 12px;"></div>
+
+    <!-- SIDEBAR -->
+    <div class="panel">
+        <h1>🎓 Sistem Dinamiği</h1>
+        <p>4 Yıllık Akademik Hayat Simülasyonu (Euler Metodu - dt=1 gün).<br><small style="color: var(--text-muted); opacity: 0.8;">Boundary: İçsel (endogenous) öğrenme dinamikleri ve dışsal (exogenous) sosyal/iş faktörleri.</small></p>
+
+        <h3 style="margin-top:2rem; font-size: 1.1rem;">🎛️ Sistem Girdileri (Inflows & Delays)</h3>
+        
+        <div class="control-group">
+            <label>Günlük Uyku <small>(Dinlenme Akışı)</small> <span class="val-display" id="val-sleep">7.0 Saat</span></label>
+            <input type="range" id="sleep_hours" min="0" max="24" step="0.5" value="7">
+        </div>
+
+        <div class="control-group">
+            <label>Haftalık Sosyal <small>(Motivasyon Girdisi)</small> <span class="val-display" id="val-social">10 Saat</span></label>
+            <input type="range" id="social_hours" min="0" max="168" step="1" value="10">
+        </div>
+
+        <div class="control-group">
+            <label>Çalışma Stratejisi <small>(Bilgi Gecikmesi)</small> <span class="val-display" id="val-cram">3 Gün Kala</span></label>
+            <input type="range" id="cram_days" min="1" max="14" step="1" value="3">
+        </div>
+
+        <h3 style="margin-top:2.5rem; font-size: 1.1rem;">⚙️ Dışsal Faktörler (Exogenous)</h3>
+        
+        <div class="control-group">
+            <label>Yarı Zamanlı İş <span class="val-display" id="val-job">0 Saat</span></label>
+            <input type="range" id="part_time_hours" min="0" max="168" step="1" value="0">
+        </div>
+
+        <div class="control-group">
+            <label>Günlük Kafein <small>(R Döngüsü)</small> <span class="val-display" id="val-caf">1 Fincan</span></label>
+            <input type="range" id="caffeine_cups" min="0" max="10" step="1" value="1">
+        </div>
+
+        <button class="btn" onclick="runSimulation()">🚀 Simülasyonu Başlat</button>
+        <button class="btn" onclick="runManualDataGen()" style="background-color: var(--success); margin-top: 1.2rem; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);">🧑‍💻 Manuel Veri Ekle</button>
+        <button class="btn" onclick="runAutoDataGen()" style="background-color: var(--warning); margin-top: 1.2rem; box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4); color: #000;">🤖 100 Rastgele Senaryo Üret</button>
+        <button class="btn btn-secondary" onclick="downloadMasterCSV()" id="btn-download" style="display:none; margin-top: 1.2rem;">💾 CSV İndir (<span id="scenario-count">0</span> Senaryo)</button>
+    </div>
+
+    <!-- MIDDLE COLUMN: PLANNER & TIMELINE -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- STUDY PLANNER PANEL -->
+        <div class="panel">
+            <h2 style="font-size: 1.5rem;">📝 Ders Planlayıcı</h2>
+            <p>Seçtiğiniz derslerin zorluğuna göre tahmini çalışma süresi belirlenir.</p>
+            
+            <div id="course-list">
+                <!-- Courses injected by JS safely without document.write -->
+            </div>
+        </div>
+
+        <!-- TIMELINE PANEL (Gerçekçi Saat Dilimleri) -->
+        <div class="panel">
+            <h2 style="font-size: 1.5rem;">⏳ Örnek Günlük Rutin</h2>
+            <p>Seçilen parametrelere göre simüle edilen ideal 24 saatlik zaman dilimi dağılımı.</p>
+            <ul class="timeline" id="routine-timeline">
+                <!-- Dynamically filled by JS -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="panel" id="dashboard" style="opacity: 0.5; filter: grayscale(1); pointer-events: none; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
+        <h2 style="font-size: 1.8rem; text-align: center; margin-bottom: 2rem;">📊 Simülasyon Sonuçları</h2>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Tahmini Mezuniyet GPA</div>
+                <div class="metric-value" id="res-gpa" style="color: var(--accent);">0.00</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Ortalama Tükenmişlik</div>
+                <div class="metric-value" id="res-burnout" style="color: var(--warning);">%0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Mezuniyet Olasılığı</div>
+                <div class="metric-value" id="res-prob" style="color: var(--success);">%0</div>
+            </div>
+        </div>
+
+        <p style="text-align: center; margin-bottom: 0.5rem; font-weight: 600;">Akademik İlerleme Durumu</p>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 2rem; margin-top: 3rem;">
+            <div class="chart-container">
+                <h3 style="margin: 0 0 1rem 0; color: #f8fafc; font-size: 1.2rem; text-align: center;">Şekil 1: Zaman İçinde Tükenmişlik ve GPA</h3>
+                <div id="chart-gpa-burnout" style="width: 100%; height: 350px;"></div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 style="margin: 0 0 1rem 0; color: #f8fafc; font-size: 1.2rem; text-align: center;">Şekil 2: Yorgunluk Limitlerinin Performansa Etkisi</h3>
+                <div id="chart-scatter" style="width: 100%; height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE PANEL (Full Width at Bottom) -->
+    <div class="panel" id="table-panel" style="display: none; max-height: 80vh; overflow-y: auto; padding-right: 1.5rem; grid-column: 1 / -1; margin-top: 2rem;">
+        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>📋 Üretilen Senaryo Verileri</span>
+            <span style="font-size: 1rem; background: var(--primary); padding: 0.4rem 1rem; border-radius: 20px; color: white;">Toplam: <span id="tbl-count">0</span></span>
+        </h2>
+        <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Sistem dinamiği modelinden elde edilen sentetik dataset.</p>
+        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                <thead style="background: rgba(0,0,0,0.5); position: sticky; top: 0; backdrop-filter: blur(10px); z-index: 10;">
+                    <tr style="color: var(--accent);">
+                        <th style="padding: 1.2rem 1rem;">ID</th>
+                        <th style="padding: 1.2rem 1rem;">Uyku (Gün)</th>
+                        <th style="padding: 1.2rem 1rem;">Ders (Gün)</th>
+                        <th style="padding: 1.2rem 1rem;">Sosyal (Hafta)</th>
+                        <th style="padding: 1.2rem 1rem;">İş (Hafta)</th>
+                        <th style="padding: 1.2rem 1rem;">Kafein</th>
+                        <th style="padding: 1.2rem 1rem;">Tükenmişlik</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- SAFE DOM INITIALIZATION ---
+        const coursesList = [
+            {id: "math", name: "Matematik", icon: "📐"},
+            {id: "physics", name: "Fizik", icon: "⚛️"},
+            {id: "chemistry", name: "Kimya", icon: "🧪"},
+            {id: "biology", name: "Biyoloji", icon: "🧬"},
+            {id: "programming", name: "Programlama", icon: "💻"},
+            {id: "history", name: "Tarih", icon: "📚"}
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const courseListContainer = document.getElementById("course-list");
+            if (courseListContainer) {
+                courseListContainer.innerHTML = coursesList.map(c => `
+                <div class="course-planner-item" style="margin-bottom: 1rem; padding: 1.2rem; background: rgba(0,0,0,0.25); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <label style="font-weight: 600; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="cb-${c.id}" value="${c.id}" onchange="toggleCourseSettings('${c.id}'); updateTimeline();" style="width: 18px; height: 18px; accent-color: var(--primary);"> 
+                            ${c.icon} ${c.name}
+                        </label>
+                        <span id="rec-${c.id}" style="color: var(--accent); font-weight: bold; display: none; font-size: 1.2rem; font-family: monospace; letter-spacing: 1px; background: rgba(0,0,0,0.4); padding: 0.4rem 0.8rem; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">00:00</span>
+                    </div>
+                    <div id="settings-${c.id}" style="display: none; margin-top: 1.5rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="font-size: 0.9rem; display: flex; justify-content: space-between; margin-bottom:0.5rem;">Soru Sayısı: <span id="val-q-${c.id}" style="color: var(--text-main); font-weight:bold;">50 Soru</span></label>
+                            <input type="range" id="q-${c.id}" min="0" max="200" step="10" value="50" oninput="document.getElementById('val-q-${c.id}').innerText = this.value + ' Soru'; updateCourseTime('${c.id}'); updateTimeline();">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Konu Zorluğu:</label>
+                            <select id="diff-${c.id}" style="width: 100%; padding: 0.8rem; border-radius: 10px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--glass-border); outline: none; font-size: 0.95rem;" onchange="updateCourseTime('${c.id}'); updateTimeline();">
+                                <option value="easy">Kolay (Hızlı Tekrar)</option>
+                                <option value="medium" selected>Orta (Standart Pratik)</option>
+                                <option value="hard">Zor (Yeni Konu Öğrenimi)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                `).join("");
+            }
+            // Timeline ilk yüklemede oluşturulur
+            updateTimeline();
+        });
+
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(message, type="success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            
+            let bgColor = "var(--success)";
+            if(type === "warning") bgColor = "var(--warning)";
+            if(type === "danger") bgColor = "var(--danger)";
+            if(type === "info") bgColor = "var(--primary)";
+            
+            toast.style.background = bgColor;
+            toast.style.color = "white";
+            toast.style.padding = "1rem 1.5rem";
+            toast.style.borderRadius = "12px";
+            toast.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+            toast.style.fontWeight = "600";
+            toast.style.fontSize = "1rem";
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(30px)";
+            toast.style.transition = "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
+            toast.innerHTML = message;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = "1";
+                toast.style.transform = "translateY(0)";
+            }, 10);
+            
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(30px)";
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        // --- UI Updates ---
+        const ids = ["sleep_hours", "social_hours", "cram_days", "part_time_hours", "caffeine_cups"];
+        const units = ["Saat", "Saat", "Gün Kala", "Saat", "Fincan"];
+        const vals = ["val-sleep", "val-social", "val-cram", "val-job", "val-caf"];
+
+        ids.forEach((id, index) => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('input', function(e) {
+                    document.getElementById(vals[index]).innerText = e.target.value + " " + units[index];
+                    updateTimeline();
+                });
+            }
+        });
+
+        // --- TIME UTILS ---
+        function formatTime(decimalHour) {
+            let h = Math.floor(decimalHour);
+            let m = Math.round((decimalHour - h) * 60);
+            
+            if (m === 60) {
+                h += 1;
+                m = 0;
+            }
+            
+            h = h % 24;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        }
+
+        function formatHalf(val) {
+            let n = parseFloat(val);
+            let whole = Math.floor(n);
+            let frac = n - whole;
+            if (frac >= 0.25 && frac < 0.75) {
+                return whole + " Buçuk";
+            } else if (frac >= 0.75) {
+                return (whole + 1).toString();
+            } else {
+                return whole.toString();
+            }
+        }
+
+        // --- TIMELINE LOGIC ---
+        function updateTimeline() {
+            const sleepEl = document.getElementById('sleep_hours');
+            if(!sleepEl) return;
+
+            const sleep = parseFloat(sleepEl.value);
+            const socialDaily = parseInt(document.getElementById('social_hours').value) / 7;
+            const jobDaily = parseInt(document.getElementById('part_time_hours').value) / 7;
+            const studyDaily = getTotalPlannerStudyHours();
+
+            let timelineHtml = "";
+            
+            // 1. Uyku (Sabit başlangıç 23:30 varsayalım)
+            let sleepStart = 23.5;
+            let wakeUp = (sleepStart + sleep) % 24;
+            timelineHtml += `
+                <li class="timeline-item" style="--timeline-color: #6366f1;">
+                    <div class="timeline-time">${formatTime(sleepStart)} - ${formatTime(wakeUp)}</div>
+                    <div class="timeline-content">😴 Uyku & Dinlenme (${formatHalf(sleep)} Saat)</div>
+                </li>
+            `;
+
+            // 2. Okul (Sabit 09:00 - 15:00)
+            let nextStart = 9;
+            timelineHtml += `
+                <li class="timeline-item" style="--timeline-color: var(--accent);">
+                    <div class="timeline-time">09:00 - 15:00</div>
+                    <div class="timeline-content">🏫 Kampüs / Dersler (6 Saat)</div>
+                </li>
+            `;
+
+            // 3. İş
+            nextStart = 15.5; // 15:30
+            if (jobDaily > 0.1) {
+                let jobEnd = nextStart + jobDaily;
+                timelineHtml += `
+                    <li class="timeline-item" style="--timeline-color: var(--warning);">
+                        <div class="timeline-time">${formatTime(nextStart)} - ${formatTime(jobEnd)}</div>
+                        <div class="timeline-content">💼 Yarı Zamanlı İş (~${jobDaily.toFixed(1)} Saat)</div>
+                    </li>
+                `;
+                nextStart = jobEnd + 0.5; // Yarım saat yol/mola
+            } else {
+                nextStart = 16.0;
+            }
+
+            // 4. Ders Çalışma (Planlayıcıdan alınan)
+            if (studyDaily > 0) {
+                let studyEnd = nextStart + studyDaily;
+                timelineHtml += `
+                    <li class="timeline-item" style="--timeline-color: #c084fc;">
+                        <div class="timeline-time">${formatTime(nextStart)} - ${formatTime(studyEnd)}</div>
+                        <div class="timeline-content">📚 Ödev & Bireysel Çalışma (${formatHalf(studyDaily)} Saat)</div>
+                    </li>
+                `;
+                nextStart = studyEnd + 0.5;
+            }
+
+            // 5. Sosyal
+            if (socialDaily > 0.1) {
+                let socialEnd = nextStart + socialDaily;
+                timelineHtml += `
+                    <li class="timeline-item" style="--timeline-color: var(--success);">
+                        <div class="timeline-time">${formatTime(nextStart)} - ${formatTime(socialEnd)}</div>
+                        <div class="timeline-content">🎉 Sosyal Etkinlik & Serbest Zaman (~${socialDaily.toFixed(1)} Saat)</div>
+                    </li>
+                `;
+            }
+
+            const routineEl = document.getElementById('routine-timeline');
+            if(routineEl) routineEl.innerHTML = timelineHtml;
+        }
+
+
+        // --- MATH & STATS UTILS ---
+        function randomNormal(mean=0, stdev=10) {
+            const u = 1 - Math.random();
+            const v = Math.random();
+            const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+            return z * stdev + mean;
+        }
+
+        function calculateGrade(score) {
+            if (score >= 90) return {letter: "AA", points: 4.0};
+            if (score >= 85) return {letter: "BA", points: 3.5};
+            if (score >= 80) return {letter: "BB", points: 3.0};
+            if (score >= 75) return {letter: "CB", points: 2.5};
+            if (score >= 70) return {letter: "CC", points: 2.0};
+            if (score >= 60) return {letter: "DC", points: 1.5};
+            if (score >= 50) return {letter: "DD", points: 1.0};
+            if (score >= 40) return {letter: "FD", points: 0.5};
+            return {letter: "FF", points: 0.0};
+        }
+
+        // Global data storage for CSV
+        let masterDataset = [["Senaryo_ID", "Gun", "Donem", "Uyku_Saati_Ayar", "Sosyal_Saat_Ayar", "Cram_Gun_Ayar", "Is_Saati_Ayar", "Kafein_Ayar", "Gerceklesen_Uyku", "Calisma_Saati", "Anlik_Motivasyon", "Kumulatif_Yorgunluk", "Tukenmislik"]];
+        let scenarioCount = 0;
+
+        function runSimulationLogic(sleep, social, cram, job, caf, scenarioId) {
+            let motivation = 100;
+            let cum_fatigue = 0;
+            let history = [];
+            let examResults = [];
+            let localData = [];
+
+            let dailyJob = Math.min(job, 168) / 7;
+
+            for (let sem = 1; sem <= 8; sem++) {
+                let courses = [];
+                for (let c = 1; c <= 5; c++) {
+                    courses.push({
+                        name: `Ders ${sem}0${c}`,
+                        difficulty: 0.8 + Math.random() * 0.4,
+                        knowledge: 0, midterm: 0, final: 0
+                    });
+                }
+
+                for (let day = 1; day <= 98; day++) {
+                    let global_day = (sem - 1) * 98 + day;
+
+                    let caf_boost = Math.min(0.3, caf * 0.05);
+                    let caf_crash = caf * 0.8;
+
+                    let optimalSleep = 7;
+                    let deficit = Math.max(0, optimalSleep - sleep) + (caf_crash / 2);
+                    let oversleepPenalty = Math.max(0, sleep - 10) * 0.5;
+                    
+                    cum_fatigue += deficit * 2.5;
+                    cum_fatigue += oversleepPenalty * 0.3;
+                    cum_fatigue += dailyJob * 1.5;
+                    
+                    let naturalRecovery = Math.min(sleep * 0.8, 6);
+                    cum_fatigue -= naturalRecovery;
+                    cum_fatigue = Math.min(100, Math.max(0, cum_fatigue));
+
+                    let efficiency = Math.exp(-0.05 * cum_fatigue) + caf_boost;
+                    efficiency = Math.min(1.0, Math.max(0.05, efficiency));
+
+                    let mot_change = 0;
+                    if (social < 5) mot_change -= 1.5;
+                    else if (social <= 15) mot_change += 1.0;
+                    else if (social <= 40) mot_change -= 0.5;
+                    else mot_change -= 1.0;
+
+                    if (dailyJob * 7 > 20) mot_change -= 1.0;
+                    else if (dailyJob * 7 > 0 && dailyJob * 7 <= 15) mot_change += 0.2;
+
+                    motivation += mot_change;
+                    motivation = Math.min(100, Math.max(0, motivation));
+                    let burnout = 100 - motivation;
+
+                    let att_penalty = 1.0;
+                    if (cum_fatigue > 85) att_penalty = 0.5;
+                    if (cum_fatigue > 95) att_penalty = 0.2;
+
+                    let isCramming = (49 - cram <= day && day < 49) || (98 - cram <= day && day < 98);
+                    let baseStudy = isCramming ? 6 : 2;
+
+                    let freeTime = 24 - sleep - dailyJob - 4;
+                    let available_time_ratio = Math.max(0, Math.min(1, freeTime / 10));
+                    let study_hours = baseStudy * (motivation / 100) * available_time_ratio * att_penalty;
+                    study_hours = Math.max(0, study_hours);
+
+                    courses.forEach(course => {
+                        let learning = (study_hours / 5) * efficiency / course.difficulty;
+                        course.knowledge += learning * 3.5;
+                        course.knowledge = Math.min(100, course.knowledge);
+
+                        if (day === 49) {
+                            let score = course.knowledge * 0.8 + randomNormal() - (cum_fatigue * 0.2);
+                            course.midterm = Math.min(100, Math.max(0, score));
+                        }
+
+                        if (day === 98) {
+                            let score = course.knowledge * 0.8 + randomNormal() - (cum_fatigue * 0.2);
+                            course.final = Math.min(100, Math.max(0, score));
+
+                            let finalGrade = course.midterm * 0.4 + course.final * 0.6;
+                            let gradeInfo = calculateGrade(finalGrade);
+
+                            examResults.push({
+                                sem: sem, name: course.name, finalGrade: finalGrade,
+                                points: gradeInfo.points, letter: gradeInfo.letter, sleep_dep: cum_fatigue
+                            });
+                        }
+                    });
+
+                    if (sleep > 7 && sleep <= 10) {
+                        cum_fatigue -= (sleep - 7) * 2;
+                        cum_fatigue = Math.max(0, cum_fatigue);
+                    }
+
+                    history.push({sem, burnout});
+                    localData.push([scenarioId, global_day, sem, sleep, social, cram, job, caf, sleep, study_hours.toFixed(2), motivation.toFixed(2), cum_fatigue.toFixed(2), burnout.toFixed(2)]);
+                }
+            }
+            return { history, examResults, localData };
+        }
+
+        // --- SIMULATION ENGINE ---
+        function runSimulation() {
+            const sleep = parseFloat(document.getElementById('sleep_hours').value);
+            const social = parseInt(document.getElementById('social_hours').value);
+            const cram = parseInt(document.getElementById('cram_days').value);
+            const job = parseInt(document.getElementById('part_time_hours').value);
+            const caf = parseInt(document.getElementById('caffeine_cups').value);
+
+            try {
+                let res = runSimulationLogic(sleep, social, cram, job, caf, 0);
+                let history = res.history;
+                let examResults = res.examResults;
+
+                let totalPoints = 0;
+                let passedCount = 0;
+                examResults.forEach(ex => {
+                    totalPoints += ex.points;
+                    if (ex.points >= 1.0) passedCount++;
+                });
+
+                let gpa = examResults.length > 0 ? totalPoints / examResults.length : 0;
+                let gradProb = examResults.length > 0 ? (passedCount / examResults.length) * 100 : 0;
+                
+                let totalBurnout = 0;
+                history.forEach(h => totalBurnout += h.burnout);
+                let avgBurnout = history.length > 0 ? totalBurnout / history.length : 0;
+
+                // UI Activation
+                let dashboard = document.getElementById("dashboard");
+                dashboard.style.opacity = "1";
+                dashboard.style.filter = "grayscale(0)";
+                dashboard.style.pointerEvents = "auto";
+                
+                document.getElementById("btn-download").style.display = "block";
+
+                document.getElementById("res-gpa").innerText = gpa.toFixed(2);
+                document.getElementById("res-burnout").innerText = "%" + avgBurnout.toFixed(0);
+                document.getElementById("res-prob").innerText = "%" + gradProb.toFixed(0);
+
+                let gpaEl = document.getElementById("res-gpa");
+                if (gpa >= 3.0) gpaEl.style.color = "var(--success)";
+                else if (gpa >= 2.0) gpaEl.style.color = "var(--warning)";
+                else gpaEl.style.color = "var(--danger)";
+
+                let burnEl = document.getElementById("res-burnout");
+                if (avgBurnout < 30) burnEl.style.color = "var(--success)";
+                else if (avgBurnout < 60) burnEl.style.color = "var(--warning)";
+                else burnEl.style.color = "var(--danger)";
+
+                let probEl = document.getElementById("res-prob");
+                let pBar = document.getElementById("progress-bar");
+                pBar.style.width = gradProb + "%";
+
+                if (gradProb >= 80) {
+                    probEl.style.color = "var(--success)";
+                    pBar.style.backgroundColor = "var(--success)";
+                    pBar.style.boxShadow = "0 0 15px var(--success)";
+                } else if (gradProb >= 50) {
+                    probEl.style.color = "var(--warning)";
+                    pBar.style.backgroundColor = "var(--warning)";
+                    pBar.style.boxShadow = "0 0 15px var(--warning)";
+                } else {
+                    probEl.style.color = "var(--danger)";
+                    pBar.style.backgroundColor = "var(--danger)";
+                    pBar.style.boxShadow = "0 0 15px var(--danger)";
+                }
+
+                drawCharts(history, examResults);
+                showToast("✅ Simülasyon başarıyla tamamlandı!", "success");
+            } catch(e) {
+                console.error(e);
+                showToast("❌ Simülasyon sırasında hata oluştu.", "danger");
+            }
+        }
+
+        // --- CHARTS ---
+        function drawCharts(history, examResults) {
+            let semBurnout = [0,0,0,0,0,0,0,0];
+            history.forEach(h => semBurnout[h.sem-1] += h.burnout / 98);
+
+            let semGpa = [0,0,0,0,0,0,0,0];
+            let counts = [0,0,0,0,0,0,0,0];
+            examResults.forEach(ex => {
+                semGpa[ex.sem-1] += ex.points * 25; 
+                counts[ex.sem-1]++;
+            });
+            for(let i=0; i<8; i++) semGpa[i] /= counts[i];
+
+            let trace1 = {
+                x: [1,2,3,4,5,6,7,8], y: semBurnout,
+                name: 'Tükenmişlik (%)', type: 'scatter',
+                line: {color: '#ef4444', width: 4}, // Neon Red
+                marker: {size: 8}
+            };
+            let trace2 = {
+                x: [1,2,3,4,5,6,7,8], y: semGpa,
+                name: 'GPA (100 Üzerinden)', type: 'scatter',
+                line: {color: '#06b6d4', width: 4}, // Neon Cyan
+                marker: {size: 8}
+            };
+
+            var layout1 = {
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: '#e2e8f0', family: 'Inter'},
+                xaxis: {title: 'Dönem', gridcolor: 'rgba(255,255,255,0.05)'},
+                yaxis: {title: 'Performans (0-100)', gridcolor: 'rgba(255,255,255,0.05)'},
+                margin: { t: 20, b: 50, l: 60, r: 30 },
+                legend: { orientation: "h", y: -0.2 }
+            };
+
+            Plotly.newPlot('chart-gpa-burnout', [trace1, trace2], layout1, {responsive: true});
+
+            let scatterX = examResults.map(e => e.sleep_dep);
+            let scatterY = examResults.map(e => e.finalGrade);
+            let scatterText = examResults.map(e => e.letter);
+
+            let trace3 = {
+                x: scatterX, y: scatterY, mode: 'markers', type: 'scatter', text: scatterText,
+                marker: { size: 10, color: '#c084fc', opacity: 0.8, line: {width: 1, color: '#fff'} }
+            };
+
+            var layout2 = {
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: '#e2e8f0', family: 'Inter'},
+                xaxis: {title: 'Sınav Öncesi Kümülatif Yorgunluk', gridcolor: 'rgba(255,255,255,0.05)'},
+                yaxis: {title: 'Sınav Notu', gridcolor: 'rgba(255,255,255,0.05)'},
+                margin: { t: 20, b: 50, l: 60, r: 30 }
+            };
+
+            Plotly.newPlot('chart-scatter', [trace3], layout2, {responsive: true});
+        }
+
+        function downloadMasterCSV() {
+            showToast("📥 CSV dosyası hazırlanıyor...", "info");
+            // Add BOM (\uFEFF) to fix Turkish character encoding in Excel
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            masterDataset.forEach(rowArray => {
+                let row = rowArray.join(",");
+                csvContent += row + "\r\n";
+            });
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "academic_sim_master_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => showToast("✅ İndirme başladı!", "success"), 1000);
+        }
+
+        function runManualDataGen() {
+            const sleep = parseFloat(document.getElementById('sleep_hours').value);
+            const social = parseInt(document.getElementById('social_hours').value);
+            const cram = parseInt(document.getElementById('cram_days').value);
+            const job = parseInt(document.getElementById('part_time_hours').value);
+            const caf = parseInt(document.getElementById('caffeine_cups').value);
+
+            scenarioCount++;
+            let res = runSimulationLogic(sleep, social, cram, job, caf, scenarioCount);
+            masterDataset = masterDataset.concat(res.localData);
+            
+            document.getElementById("btn-download").style.display = "block";
+            document.getElementById("scenario-count").innerText = scenarioCount;
+            document.getElementById("tbl-count").innerText = scenarioCount;
+            
+            runSimulation();
+            showToast("✏️ Manuel senaryo başarıyla eklendi.", "success");
+        }
+
+        function runAutoDataGen() {
+            showToast("⏳ 100 Senaryo üretiliyor, lütfen bekleyin...", "warning");
+            
+            setTimeout(() => {
+                let totalNewScenarios = 100;
+                let currentBatchRecords = [];
+                for(let i=0; i<totalNewScenarios; i++) {
+                    scenarioCount++;
+                    let sleep = 4 + Math.random() * 6; 
+                    let social = Math.floor(Math.random() * 31); 
+                    let cram = Math.floor(Math.random() * 14) + 1; 
+                    let job = Math.floor(Math.random() * 26); 
+                    let caf = Math.floor(Math.random() * 6); 
+                    
+                    let res = runSimulationLogic(sleep, social, cram, job, caf, scenarioCount);
+                    masterDataset = masterDataset.concat(res.localData);
+                    
+                    let totalBurnout = 0;
+                    res.history.forEach(h => totalBurnout += h.burnout);
+                    let avgBurnout = res.history.length > 0 ? (totalBurnout / res.history.length) : 0;
+                    
+                    let dailyStudy = getTotalPlannerStudyHours();
+                    let roundedSleep = Math.round(sleep * 2) / 2;
+                    let roundedStudy = Math.round(dailyStudy * 2) / 2;
+                    
+                    currentBatchRecords.push({
+                        id: scenarioCount, sleep: roundedSleep, study: roundedStudy,
+                        social: social, job: job, caf: caf, burnout: parseFloat(avgBurnout.toFixed(1))
+                    });
+                }
+
+                document.getElementById("btn-download").style.display = "block";
+                document.getElementById("scenario-count").innerText = scenarioCount;
+                document.getElementById("tbl-count").innerText = scenarioCount;
+                
+                runSimulation();
+                
+                document.getElementById("table-panel").style.display = "block";
+                let tableHTML = "";
+                currentBatchRecords.forEach(r => {
+                    let burnColor = r.burnout > 60 ? 'var(--danger)' : (r.burnout > 30 ? 'var(--warning)' : 'var(--success)');
+                    tableHTML += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1rem; font-weight: 800; color: var(--text-muted);">#${r.id}</td>
+                        <td style="padding: 1rem;">${formatHalf(r.sleep)} sa</td>
+                        <td style="padding: 1rem; color: var(--accent); font-weight: 600;">${formatHalf(r.study)} sa</td>
+                        <td style="padding: 1rem;">${r.social} sa</td>
+                        <td style="padding: 1rem;">${r.job} sa</td>
+                        <td style="padding: 1rem;">${r.caf} ☕</td>
+                        <td style="padding: 1rem; font-weight: bold; color: ${burnColor};">%${r.burnout}</td>
+                    </tr>
+                    `;
+                });
+                
+                document.getElementById("data-table-body").innerHTML = tableHTML;
+                showToast("🤖 100 Rastgele senaryo başarıyla üretildi!", "success");
+                
+                // Scroll to table smoothly
+                document.getElementById("table-panel").scrollIntoView({behavior: "smooth", block: "start"});
+            }, 100);
+        }
+
+        // --- COURSE PLANNER LOGIC ---
+        function toggleCourseSettings(courseId) {
+            const isChecked = document.getElementById(`cb-${courseId}`).checked;
+            const settingsDiv = document.getElementById(`settings-${courseId}`);
+            const recSpan = document.getElementById(`rec-${courseId}`);
+            
+            if(isChecked) {
+                settingsDiv.style.display = "block";
+                recSpan.style.display = "block";
+                updateCourseTime(courseId);
+            } else {
+                settingsDiv.style.display = "none";
+                recSpan.style.display = "none";
+            }
+        }
+
+        function updateCourseTime(courseId) {
+            let qCount = parseInt(document.getElementById(`q-${courseId}`).value);
+            let diffLevel = document.getElementById(`diff-${courseId}`).value;
+            
+            let baseHours = 0;
+            let minsPerQuestion = 0.5;
+
+            if (diffLevel === "easy") { baseHours = 0.0; minsPerQuestion = 0.4; } 
+            else if (diffLevel === "medium") { baseHours = 0.25; minsPerQuestion = 0.7; } 
+            else if (diffLevel === "hard") { baseHours = 0.75; minsPerQuestion = 1.2; }
+            
+            if (courseId === "math" || courseId === "physics") minsPerQuestion *= 1.1; 
+            else if (courseId === "chemistry" || courseId === "biology") minsPerQuestion *= 0.9; 
+            else if (courseId === "history") minsPerQuestion *= 0.6; 
+
+            let totalHours = baseHours + (qCount * minsPerQuestion) / 60;
+            if(qCount === 0) totalHours = 0;
+
+            let totalMinutes = Math.round(totalHours * 60);
+            if (totalMinutes > 180) totalMinutes = 180;
+
+            let h = Math.floor(totalMinutes / 60);
+            let m = totalMinutes % 60;
+
+            document.getElementById(`rec-${courseId}`).innerText = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0');
+        }
+
+        function getTotalPlannerStudyHours() {
+            const allCourses = ["math", "physics", "chemistry", "biology", "programming", "history"];
+            let totalHours = 0;
+            
+            allCourses.forEach(cid => {
+                let cb = document.getElementById(`cb-${cid}`);
+                if (cb && cb.checked) totalHours += getCourseHours(cid);
+            });
+            
+            if (totalHours === 0) totalHours = 2.0; 
+            return totalHours;
+        }
+        
+        function getCourseHours(courseId) {
+            let qCount = parseInt(document.getElementById(`q-${courseId}`).value);
+            let diffLevel = document.getElementById(`diff-${courseId}`).value;
+            
+            let baseHours = 0; let minsPerQuestion = 0.5;
+            if (diffLevel === "easy") { baseHours = 0.0; minsPerQuestion = 0.4; } 
+            else if (diffLevel === "medium") { baseHours = 0.25; minsPerQuestion = 0.7; } 
+            else if (diffLevel === "hard") { baseHours = 0.75; minsPerQuestion = 1.2; }
+            
+            if (courseId === "math" || courseId === "physics") minsPerQuestion *= 1.1;
+            else if (courseId === "chemistry" || courseId === "biology") minsPerQuestion *= 0.9;
+            else if (courseId === "history") minsPerQuestion *= 0.6;
+
+            let total = baseHours + (qCount * minsPerQuestion) / 60;
+            if (qCount === 0) total = 0;
+            if (total > 3) total = 3; 
+            
+            return total;
+        }
+    </script>
+</body>
+</html>
